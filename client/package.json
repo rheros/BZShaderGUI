@@ -1,0 +1,22 @@
+{
+	"name": "BZShaderGUIVS-client",
+	"description": "BZShaderGUIVS part of a language server",
+	"author": "rheros",
+	"license": "MIT",
+	"version": "0.0.1",
+	"publisher": "rheros",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/rheros/BZShaderGUIVS"
+	},
+	"engines": {
+		"vscode": "^1.75.0"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^9.0.1"
+	},
+	"devDependencies": {
+		"@types/vscode": "^1.75.1",
+		"@vscode/test-electron": "^2.3.9"
+	}
+}
