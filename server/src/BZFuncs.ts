@@ -247,8 +247,6 @@ function getBZTags():CompletionItem[]
 
 export function GetShaderGUITags():CompletionItem[]
 {
-
-
 	const ts=getBZTags();
 	const ts2=getBZTags();
 	ts.forEach(element => {
@@ -274,264 +272,288 @@ function extractMethodName(text: string | undefined, position: Position): string
     return match ? match[1] : '';
 }
 
+const allSignatures: { [key: string]: SignatureInformation[] } = {
+	'TG': [
+		SignatureInformation.create(
+			'TG(name)',
+			tgInfo,
+			ParameterInformation.create('name', 'a Toggle Property name as group name')
+		),
+		SignatureInformation.create(
+			'TG(name,order)',
+			tgInfo,
+			ParameterInformation.create('name', 'a Toggle Property name as group name'),
+			ParameterInformation.create('order', 'int num for group sorting,default 50')
+		),
+		SignatureInformation.create(
+			'TG(name,order,style)',
+			tgInfo,
+			ParameterInformation.create('name', 'a Toggle Property name as group name'),
+			ParameterInformation.create('order', 'int num for group sorting,default 50'),
+			ParameterInformation.create('style', 'GUI Style ,default box')
+		)
+	],
+	'FD': [
+		SignatureInformation.create(
+			'FD(name)',
+			fdInfo,
+			ParameterInformation.create('name', 'string name')
+		),
+		SignatureInformation.create(
+			'FD(name,order)',
+			fdInfo,
+			ParameterInformation.create('name', 'string name'),
+			ParameterInformation.create('order', 'int num for group sorting,default 50')
+		),
+		SignatureInformation.create(
+			'FD(name,order,style)',
+			fdInfo,
+			ParameterInformation.create('name', 'string name'),
+			ParameterInformation.create('order', 'int num for group sorting,default 50'),
+			ParameterInformation.create('style', 'GUI Style ,default box')
+		)
+	],
+	'BG': [
+		SignatureInformation.create(
+			'BG(name)',
+			bgInfo,
+			ParameterInformation.create('name', 'string name')
+		),
+		SignatureInformation.create(
+			'BG(name,order)',
+			bgInfo,
+			ParameterInformation.create('name', 'string name'),
+			ParameterInformation.create('order', 'int num for group sorting,default 50')
+		),
+		SignatureInformation.create(
+			'BG(name,order,style)',
+			bgInfo,
+			ParameterInformation.create('name', 'string name'),
+			ParameterInformation.create('order', 'int num for group sorting,default 50'),
+			ParameterInformation.create('style', 'GUI Style ,default box')
+		)
+	],
+	'SIF': [
+		SignatureInformation.create(
+			'SIF(targetPropName)',
+			sifInfo,
+			ParameterInformation.create('targetPropName', 'targetPropName')
+		),
+		SignatureInformation.create(
+			'SIF(targetPropName,comFunc)',
+			sifInfo,
+			ParameterInformation.create('targetPropName', 'targetPropName'),
+			ParameterInformation.create('comFunc', 'E、LE、GE、L、G、HT、NT')
+		),
+		SignatureInformation.create(
+			'SIF(targetPropName,comFunc,VectorCom)',
+			sifInfo,
+			ParameterInformation.create('targetPropName', 'targetPropName'),
+			ParameterInformation.create('comFunc', 'E、LE、GE、L、G、HT、NT'),
+			ParameterInformation.create('VectorCom', 'if target property is vector and want to compare one of the vector component ,use this param to figure it')
+		)
+	],
+	'TT': [
+		SignatureInformation.create(
+			'TT(value)',
+			ttInfo,
+			ParameterInformation.create('value', 'targetValue')
+		),
+		SignatureInformation.create(
+			'TT(v1,v2,v3,v4)',
+			ttInfo,
+			ParameterInformation.create('v', 'targetValue for each vector component')
+		)
+	],
+	'Dir2D': [
+		SignatureInformation.create(
+			'Dir2D',
+			Dir2Info
+		),
+		SignatureInformation.create(
+			'Dir2D(true)',
+			Dir2Info,
+			ParameterInformation.create('true', 'true :split vector length as z, so xy on specify direction, \n'+
+				'false: vector length specified by xy, same as no param')
+		)
+	],
+	'ST': [
+		SignatureInformation.create(
+			'ST',
+			stInfo
+		),
+		SignatureInformation.create(
+			'ST(true)',
+			stInfo,
+			ParameterInformation.create('true', 'true :for element in oneline, \n'+
+				'false: x y in oneline ,z w in next line')
+		)
+	],
+	'V4S': [
+		SignatureInformation.create(
+			'V4S(name)',
+			v4sInfo,
+			ParameterInformation.create('name', "x DisplayName")
+		),
+		SignatureInformation.create(
+			'V4S(name1,name2)',
+			v4sInfo,
+			ParameterInformation.create('name1', "x DisplayName"),
+			ParameterInformation.create('name2', "y DisplayName"),
+		),
+		SignatureInformation.create(
+			'V4S(name1,name2,name3)',
+			v4sInfo,
+			ParameterInformation.create('name1', "x DisplayName"),
+			ParameterInformation.create('name2', "y DisplayName"),
+			ParameterInformation.create('name3', "z DisplayName"),
+		),
+		SignatureInformation.create(
+			'V4S(name1,name2,name3,name4)',
+			v4sInfo,
+			ParameterInformation.create('name1', "x DisplayName"),
+			ParameterInformation.create('name2', "y DisplayName"),
+			ParameterInformation.create('name3', "z DisplayName"),
+			ParameterInformation.create('name4', "w DisplayName"),
+		)
+	],
+	'V': [
+		SignatureInformation.create(
+			'V(names)',
+			vInfo,
+			ParameterInformation.create('names', "Any combination of components , like XY or ZWYX")
+		),
+	],
+	'VX_Y_ZW': [
+		SignatureInformation.create(
+			'VX_Y_ZW(xName,yName,zwName)',
+			vxyzwInfo,
+			ParameterInformation.create('xName', "the label of x for display"),
+			ParameterInformation.create('yName', "the label of y for display"),
+			ParameterInformation.create('zwName', "the label of z w for display"),
+		),
+	],
+	'VX_YZ_W': [
+		SignatureInformation.create(
+			'VX_YZ_W(xName,yzName,wName)',
+			vxyzwInfo,
+			ParameterInformation.create('xName', "the label of x for display"),
+			ParameterInformation.create('yzName', "the label of y z for display"),
+			ParameterInformation.create('wName', "the label of w for display"),
+		),
+	],
+	'VX_YZ': [
+		SignatureInformation.create(
+			'VX_YZ(xName,yzName)',
+			vxyzwInfo,
+			ParameterInformation.create('xName', "the label of x for display"),
+			ParameterInformation.create('yzName', "the label of y z for display"),
+		),
+	],
+	'VX_YZW': [
+		SignatureInformation.create(
+			'VX_YZW(xName,yzwName)',
+			vxyzwInfo,
+			ParameterInformation.create('xName', "the label of x for display"),
+			ParameterInformation.create('yzwName', "the label of y z w for display"),
+		),
+	],
+	'VXY_Z_W': [
+		SignatureInformation.create(
+			'VXY_Z_W(xyName,zName,wName)',
+			vxyzwInfo,
+			ParameterInformation.create('xyName', "the label of x y for display"),
+			ParameterInformation.create('zName', "the label of z for display"),
+			ParameterInformation.create('wName', "the label of w for display"),
+		),
+	],
+	'VXY_Z': [
+		SignatureInformation.create(
+			'VXY_Z(xyName,zName)',
+			vxyzwInfo,
+			ParameterInformation.create('xyName', "the label of x y for display"),
+			ParameterInformation.create('zName', "the label of z for display"),
+		),
+	],
+	'VXY_ZW': [
+		SignatureInformation.create(
+			'VXY_ZW(xyName,zwName)',
+			vxyzwInfo,
+			ParameterInformation.create('xyName', "the label of x y for display"),
+			ParameterInformation.create('zwName', "the label of z w for display"),
+		),
+	],
+	'VXY': [
+		SignatureInformation.create(
+			'VXY(xyName)',
+			vxyzwInfo,
+			ParameterInformation.create('xyName', "the label of x y for display"),
+		),
+	],
+	'VXYZ_W': [
+		SignatureInformation.create(
+			'VXYZ_W(xyzName,wName)',
+			vxyzwInfo,
+			ParameterInformation.create('xyzName', "the label of x y z for display"),
+			ParameterInformation.create('wName', "the label of w for display")
+		),
+	],
+	'VXYZ': [
+		SignatureInformation.create(
+			'VXYZ(xyzName)',
+			vxyzwInfo,
+			ParameterInformation.create('xyzName', "the label of x y z for display"),
+		),
+	],
+	'MMS': [
+		SignatureInformation.create(
+			'MMS',
+			mmsInfo,
+		),
+		SignatureInformation.create(
+			'MMS(min,max)',
+			"draw a slider use X Y component within min to max",
+			ParameterInformation.create('min', "slider min value"),
+			ParameterInformation.create('max', "slider max value")
+		),	
+		SignatureInformation.create(
+			'MMS(min,max,vecCom1,vecCom2)',
+			"draw a slider use specified vecCom1 and vecCom2 within min to max",
+			ParameterInformation.create('min', "slider min value"),
+			ParameterInformation.create('max', "slider max value"),
+			ParameterInformation.create('vecCom1', "vector component for min"),
+			ParameterInformation.create('vecCom2', "vector component for max"),
+		),
+	],
+
+};
+
 export function getSignaturesForMethod(text: string | undefined, position: Position): SignatureInformation[] {
-	const methodName=extractMethodName(text,position);
+	
+	if(!text)
+		return [];
 
-    const allSignatures: { [key: string]: SignatureInformation[] } = {
-        'TG': [
-            SignatureInformation.create(
-                'TG(name)',
-                tgInfo,
-                ParameterInformation.create('name', 'a Toggle Property name as group name')
-            ),
-            SignatureInformation.create(
-                'TG(name,order)',
-                tgInfo,
-                ParameterInformation.create('name', 'a Toggle Property name as group name'),
-				ParameterInformation.create('order', 'int num for group sorting,default 50')
-            ),
-            SignatureInformation.create(
-                'TG(name,order,style)',
-				tgInfo,
-                ParameterInformation.create('name', 'a Toggle Property name as group name'),
-				ParameterInformation.create('order', 'int num for group sorting,default 50'),
-                ParameterInformation.create('style', 'GUI Style ,default box')
-            )
-        ],
-		'FD': [
-            SignatureInformation.create(
-                'FD(name)',
-                fdInfo,
-                ParameterInformation.create('name', 'string name')
-            ),
-            SignatureInformation.create(
-                'FD(name,order)',
-                fdInfo,
-                ParameterInformation.create('name', 'string name'),
-				ParameterInformation.create('order', 'int num for group sorting,default 50')
-            ),
-            SignatureInformation.create(
-                'FD(name,order,style)',
-                fdInfo,
-                ParameterInformation.create('name', 'string name'),
-				ParameterInformation.create('order', 'int num for group sorting,default 50'),
-                ParameterInformation.create('style', 'GUI Style ,default box')
-            )
-        ],
-		'BG': [
-            SignatureInformation.create(
-                'BG(name)',
-                bgInfo,
-                ParameterInformation.create('name', 'string name')
-            ),
-            SignatureInformation.create(
-                'BG(name,order)',
-                bgInfo,
-                ParameterInformation.create('name', 'string name'),
-				ParameterInformation.create('order', 'int num for group sorting,default 50')
-            ),
-            SignatureInformation.create(
-                'BG(name,order,style)',
-                bgInfo,
-                ParameterInformation.create('name', 'string name'),
-				ParameterInformation.create('order', 'int num for group sorting,default 50'),
-                ParameterInformation.create('style', 'GUI Style ,default box')
-            )
-        ],
-		'SIF': [
-            SignatureInformation.create(
-                'SIF(targetPropName)',
-                sifInfo,
-                ParameterInformation.create('targetPropName', 'targetPropName')
-            ),
-            SignatureInformation.create(
-                'SIF(targetPropName,comFunc)',
-                sifInfo,
-                ParameterInformation.create('targetPropName', 'targetPropName'),
-				ParameterInformation.create('comFunc', 'E、LE、GE、L、G、HT、NT')
-            ),
-            SignatureInformation.create(
-                'SIF(targetPropName,comFunc,VectorCom)',
-                sifInfo,
-                ParameterInformation.create('targetPropName', 'targetPropName'),
-				ParameterInformation.create('comFunc', 'E、LE、GE、L、G、HT、NT'),
-                ParameterInformation.create('VectorCom', 'if target property is vector and want to compare one of the vector component ,use this param to figure it')
-            )
-        ],
-		'TT': [
-            SignatureInformation.create(
-                'TT(value)',
-                ttInfo,
-                ParameterInformation.create('value', 'targetValue')
-            ),
-			SignatureInformation.create(
-                'TT(v1,v2,v3,v4)',
-                ttInfo,
-                ParameterInformation.create('v', 'targetValue for each vector component')
-            )
-        ],
-		'Dir2D': [
-            SignatureInformation.create(
-                'Dir2D',
-                Dir2Info
-            ),
-			SignatureInformation.create(
-                'Dir2D(true)',
-                Dir2Info,
-                ParameterInformation.create('true', 'true :split vector length as z, so xy on specify direction, \n'+
-					'false: vector length specified by xy, same as no param')
-            )
-        ],
-		'ST': [
-            SignatureInformation.create(
-                'ST',
-                stInfo
-            ),
-			SignatureInformation.create(
-                'ST(true)',
-                stInfo,
-                ParameterInformation.create('true', 'true :for element in oneline, \n'+
-					'false: x y in oneline ,z w in next line')
-            )
-        ],
-		'V4S': [
-			SignatureInformation.create(
-                'V4S(name)',
-                v4sInfo,
-                ParameterInformation.create('name', "x DisplayName")
-            ),
-			SignatureInformation.create(
-                'V4S(name1,name2)',
-                v4sInfo,
-                ParameterInformation.create('name1', "x DisplayName"),
-				ParameterInformation.create('name2', "y DisplayName"),
-            ),
-			SignatureInformation.create(
-                'V4S(name1,name2,name3)',
-                v4sInfo,
-				ParameterInformation.create('name1', "x DisplayName"),
-				ParameterInformation.create('name2', "y DisplayName"),
-				ParameterInformation.create('name3', "z DisplayName"),
-            ),
-			SignatureInformation.create(
-                'V4S(name1,name2,name3,name4)',
-                v4sInfo,
-				ParameterInformation.create('name1', "x DisplayName"),
-				ParameterInformation.create('name2', "y DisplayName"),
-				ParameterInformation.create('name3', "z DisplayName"),
-				ParameterInformation.create('name4', "w DisplayName"),
-            )
-        ],
-		'V': [
-			SignatureInformation.create(
-                'V(names)',
-                vInfo,
-                ParameterInformation.create('names', "Any combination of components , like XY or ZWYX")
-            ),
-        ],
-		'VX_Y_ZW': [
-			SignatureInformation.create(
-                'VX_Y_ZW(xName,yName,zwName)',
-                vxyzwInfo,
-                ParameterInformation.create('xName', "the label of x for display"),
-				ParameterInformation.create('yName', "the label of y for display"),
-				ParameterInformation.create('zwName', "the label of z w for display"),
-            ),
-        ],
-		'VX_YZ_W': [
-			SignatureInformation.create(
-                'VX_YZ_W(xName,yzName,wName)',
-                vxyzwInfo,
-                ParameterInformation.create('xName', "the label of x for display"),
-				ParameterInformation.create('yzName', "the label of y z for display"),
-				ParameterInformation.create('wName', "the label of w for display"),
-            ),
-        ],
-		'VX_YZ': [
-			SignatureInformation.create(
-                'VX_YZ(xName,yzName)',
-                vxyzwInfo,
-                ParameterInformation.create('xName', "the label of x for display"),
-				ParameterInformation.create('yzName', "the label of y z for display"),
-            ),
-        ],
-		'VX_YZW': [
-			SignatureInformation.create(
-                'VX_YZW(xName,yzwName)',
-                vxyzwInfo,
-				ParameterInformation.create('xName', "the label of x for display"),
-				ParameterInformation.create('yzwName', "the label of y z w for display"),
-            ),
-        ],
-		'VXY_Z_W': [
-			SignatureInformation.create(
-                'VXY_Z_W(xyName,zName,wName)',
-                vxyzwInfo,
-                ParameterInformation.create('xyName', "the label of x y for display"),
-				ParameterInformation.create('zName', "the label of z for display"),
-				ParameterInformation.create('wName', "the label of w for display"),
-            ),
-        ],
-		'VXY_Z': [
-			SignatureInformation.create(
-                'VXY_Z(xyName,zName)',
-                vxyzwInfo,
-                ParameterInformation.create('xyName', "the label of x y for display"),
-				ParameterInformation.create('zName', "the label of z for display"),
-            ),
-        ],
-		'VXY_ZW': [
-			SignatureInformation.create(
-                'VXY_ZW(xyName,zwName)',
-                vxyzwInfo,
-                ParameterInformation.create('xyName', "the label of x y for display"),
-				ParameterInformation.create('zwName', "the label of z w for display"),
-            ),
-        ],
-		'VXY': [
-			SignatureInformation.create(
-                'VXY(xyName)',
-                vxyzwInfo,
-                ParameterInformation.create('xyName', "the label of x y for display"),
-            ),
-        ],
-		'VXYZ_W': [
-			SignatureInformation.create(
-                'VXYZ_W(xyzName,wName)',
-                vxyzwInfo,
-                ParameterInformation.create('xyzName', "the label of x y z for display"),
-				ParameterInformation.create('wName', "the label of w for display")
-            ),
-        ],
-		'VXYZ': [
-			SignatureInformation.create(
-                'VXYZ(xyzName)',
-                vxyzwInfo,
-                ParameterInformation.create('xyzName', "the label of x y z for display"),
-            ),
-        ],
-		'MMS': [
-			SignatureInformation.create(
-                'MMS',
-                mmsInfo,
-            ),
-			SignatureInformation.create(
-                'MMS(min,max)',
-                "draw a slider use X Y component within min to max",
-                ParameterInformation.create('min', "slider min value"),
-				ParameterInformation.create('max', "slider max value")
-            ),	
-			SignatureInformation.create(
-                'MMS(min,max,vecCom1,vecCom2)',
-                "draw a slider use specified vecCom1 and vecCom2 within min to max",
-                ParameterInformation.create('min', "slider min value"),
-				ParameterInformation.create('max', "slider max value"),
-                ParameterInformation.create('vecCom1', "vector component for min"),
-				ParameterInformation.create('vecCom2', "vector component for max"),
-            ),
-        ],
+	// 获取光标位置之前的文本
+	const lines = text.split('\n');
+	const line = lines[position.line];
+	const beforeCursor = line.substring(0, position.character);
 
-    };
+	// 使用正则表达式提取方法名
+	const match = beforeCursor.match(/\[\s*(\w+)\s*\(/);
+	const methodName=match?match[1]:"";
 
-    return allSignatures[methodName] || [];
+	const quardMatch=line.match(/\[\s*(\w+)\s*\(\s*[\w,]*/);
+	const quarString =quardMatch?quardMatch[0]:"";
+	const commaMatch=quarString.match(/,/);
+	const commaNum=commaMatch?commaMatch.entries.length:0;
+
+	const list=allSignatures[methodName] || [];
+	const finalList:SignatureInformation[]=[];
+	list.forEach(element => {
+		if(element.parameters&&element.parameters.length>commaNum)
+		{
+			finalList.push(element);
+		}
+	});
+    return finalList; 
 }

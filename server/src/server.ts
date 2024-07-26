@@ -60,10 +60,6 @@ connection.onInitialize((params: InitializeParams) => {
 			completionProvider: {
 				resolveProvider: true
 			},
-			diagnosticProvider: {
-				interFileDependencies: false,
-				workspaceDiagnostics: false
-			},
 			signatureHelpProvider: {
                 triggerCharacters: ['(', ',','['],
             },
@@ -118,31 +114,6 @@ connection.onDidChangeConfiguration(change => {
 			(change.settings.languageServerExample || defaultSettings)
 		);
 	}
-	// Refresh the diagnostics since the `maxNumberOfProblems` could have changed.
-	// We could optimize things here and re-fetch the setting first can compare it
-	// to the existing setting, but this is out of scope for this example.
-	connection.languages.diagnostics.refresh();
-});
-
-connection.languages.diagnostics.on(async (params) => {
-	const document = documents.get(params.textDocument.uri);
-	return {
-		kind: DocumentDiagnosticReportKind.Full,
-		items: []
-	} satisfies DocumentDiagnosticReport;
-	// if (document !== undefined) {
-	// 	return {
-	// 		kind: DocumentDiagnosticReportKind.Full,
-	// 		items: await validateTextDocument(document)
-	// 	} satisfies DocumentDiagnosticReport;
-	// } else {
-	// 	// We don't know the document. We can either try to read it from disk
-	// 	// or we don't report problems for it.
-	// 	return {
-	// 		kind: DocumentDiagnosticReportKind.Full,
-	// 		items: []
-	// 	} satisfies DocumentDiagnosticReport;
-	// }
 });
 
 connection.onSignatureHelp(
@@ -161,27 +132,10 @@ connection.onSignatureHelp(
     }
 );
 
-
-function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
-	if (!hasConfigurationCapability) {
-		return Promise.resolve(globalSettings);
-	}
-	let result = documentSettings.get(resource);
-	if (!result) {
-		result = connection.workspace.getConfiguration({
-			scopeUri: resource,
-			section: 'languageServerExample'
-		});
-		documentSettings.set(resource, result);
-	}
-	return result;
-}
-
 // Only keep settings for open documents
 documents.onDidClose(e => {
 	documentSettings.delete(e.document.uri);
 });
-
 
 connection.onDidChangeWatchedFiles(_change => {
 	// Monitored files have change in VSCode
