@@ -9,10 +9,7 @@
 		"url": "https://github.com/rheros/BZShaderGUIVS"
 	},
 	"publisher": "rheros",
-	"categories": [
-		"Snippets",
-		"Programming Languages"
-	],
+	"categories": [	],
 	"keywords": [
 		"Shaderlab, BZShaderGUI"
 	],
@@ -20,17 +17,10 @@
 		"vscode": "^1.75.0"
 	},
 	"activationEvents": [
-		"onLanguage:ShaderLab",
-		"onLanguage:UnityShader",
 		"onLanguage:plaintext"
 	],
 	"main": "./client/out/extension",
 	"contributes": {
-		"grammars": [
-			{
-				"language": "shaderlab"
-			}
-		],
 		"configuration": {
 			"type": "object",
 			"title": "BZShaderGUI Code prompt",
@@ -52,7 +42,6 @@
 					"default": "off",
 					"description": "Traces the communication between VS Code and the language server."
 				}
-			
 			}
 			
 		}
